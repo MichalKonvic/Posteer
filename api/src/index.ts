@@ -56,6 +56,20 @@ app.get("/posts", (req: Request, res: Response) => {
   res.status(200).json(posts);
 });
 
+app.get("/user", (req: Request, res: Response) => {
+  let {id} = req.query;
+  if(!id){
+    res.status(400).send("ID is required");
+    return;
+  }
+  let user = posts.find(post => post.user.id === id)?.user;
+  if(!user){
+    res.status(404).send("User not found");
+    return;
+  }
+  res.status(200).json(user);
+});
+
 app.get("/posts/count", (req: Request, res: Response) => {
   res.status(200).json({count: posts.length});
 });
