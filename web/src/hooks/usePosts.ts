@@ -20,7 +20,6 @@ const usePosts = () => {
     const [posts, setPosts] = useState<Post[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [limit, setLimit] = useState<number>(10);
-    const [offset, setOffset] = useState<number>(0);
     const [maxCount, setMaxCount] = useState<number>(0);
     const [hasMore, setHasMore] = useState<boolean>(true);
     const loadMaxCount = useCallback(async () => {
@@ -35,48 +34,52 @@ const usePosts = () => {
         setIsLoading(false);
     }, []);
     const loadLocations = useCallback(async () => {
-        if(limit + offset > maxCount) return;
+        if(posts.length === maxCount) return;
         setIsLoading(true);
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts?offset=${offset}&limit=${limit}`);
-            const data = await response.json();
-            setPosts((prevPosts) => [...prevPosts, ...data]);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts?offset=${posts.length}&limit=${limit}`);
+            const data = await response.json() as Post[];
+            setPosts((prevPosts) => {
+                const filteredPosts = data.filter((post) => !prevPosts.some((newPost:Post) => newPost.id === post.id));
+                const joinedPosts = [...prevPosts, ...filteredPosts];
+                // Determine if has more
+                if(joinedPosts.length < maxCount){
+                    setHasMore(true);
+                }else{
+                    setHasMore(false);
+                }
+                return [...joinedPosts]
+            });
         } catch (error) {
             console.error("Error loading posts");              
         }
         setIsLoading(false);
-    }, [offset,limit, maxCount]);
+    }, [posts.length,limit,maxCount]);
+    
     useEffect(() => {
         loadMaxCount();
     }, [loadMaxCount]);
+
+    // Initial load
     useEffect(() => {
+        if(maxCount > 0 && posts.length === 0){
+            loadLocations();
+        }
+    },[loadLocations,maxCount,posts.length])
+
+
+    const loadMore = useCallback(() => {
         loadLocations();
     }, [loadLocations]);
 
-    // Checks if has more posts to load
-    useEffect(() => {
-        if(isLoading) return;
-        if(offset + limit >= maxCount){
-            setHasMore(false);
-        }
-    }, [offset, limit, maxCount,isLoading]);
-    const loadMore = useCallback(() => {
-        if(offset + limit < maxCount){
-            setOffset((prevOffset) => prevOffset + limit);
-        }else{
-            setHasMore(false);
-        }
-    }, [offset, limit, maxCount]);
-
     const reload = useCallback(() => {
-        setOffset(0);
         setPosts([]);
-        setHasMore(true);
+        setMaxCount(0);
         (async () => {
             await loadMaxCount();
             await loadLocations();
-        })();
-    },[loadMaxCount,loadLocations])
+        })
+    },[loadLocations,loadMaxCount])
 
     return {posts, isLoading, hasMore, loadMore,reload};
 };
