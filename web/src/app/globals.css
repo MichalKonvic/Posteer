@@ -31,3 +31,9 @@ body {
     text-wrap: balance;
   }
 }
+
+.infinite-scroll-component__outerdiv {
+  /* display: flex; */
+  width: 100%;
+  /* justify-content: center; */
+}

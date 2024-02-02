@@ -2,7 +2,7 @@ import React from 'react'
 
 const PostLoading = () => {
   return (
-    <div className='flex flex-col gap-4 min-w-56 max-w-[460px] w-full border border-white/20 hover:bg-white/5 duration-200 p-4 rounded-xl group'>
+    <div className='flex flex-col gap-4 min-w-56 max-w-[460px] w-full border border-white/20 hover:bg-white/5 duration-200 p-4 rounded-xl group mx-auto'>
         <div className='w-full h-fit flex gap-4 items-center select-none'>
             <div className='rounded-full w-16 h-16 bg-zinc-800 animate-pulse' />
             <div className='flex flex-col'>

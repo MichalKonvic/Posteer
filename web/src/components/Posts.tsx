@@ -9,7 +9,10 @@ interface Props {
 }
 
 const Posts:FC<Props> = ({posts}) => {
-  return posts.map((post) => <Post key={post.id} post={post} />)
+  if(posts.length === 0) return null;
+  return <div className='flex w-full flex-col gap-8 items-center'>
+    {posts.map((post) => <Post key={post.id} post={post} />)}
+  </div>
 }
 
 export default Posts
