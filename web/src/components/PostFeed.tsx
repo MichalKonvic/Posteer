@@ -1,12 +1,17 @@
 "use client";
-import React from 'react'
+import React, { FC } from 'react'
 import InfiniteScroll from 'react-infinite-scroll-component'
 import Posts from './Posts'
-import usePosts from '@/hooks/usePosts';
+import usePosts, { Post } from '@/hooks/usePosts';
 import PostLoading from './PostLoading';
 
-const PostFeed = () => {
-    const {posts,loadMore,hasMore,reload} = usePosts();
+interface Props {
+    initialPosts?: Post[];
+    initialCount?: number;
+}
+
+const PostFeed:FC<Props> = ({initialCount,initialPosts}) => {
+    const {posts,loadMore,hasMore,reload} = usePosts(initialCount,initialPosts);
   return (
     <InfiniteScroll
         dataLength={posts.length}

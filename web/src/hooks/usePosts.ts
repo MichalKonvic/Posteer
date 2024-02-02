@@ -16,11 +16,11 @@ export interface Post {
     updatedAt:string,
 }
 
-const usePosts = () => {
-    const [posts, setPosts] = useState<Post[]>([]);
+const usePosts = (initMaxCount?:number, initPosts?: Post[]) => {
+    const [posts, setPosts] = useState<Post[]>(initPosts || []);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [limit, setLimit] = useState<number>(10);
-    const [maxCount, setMaxCount] = useState<number>(0);
+    const [maxCount, setMaxCount] = useState<number>(initMaxCount || 0);
     const [hasMore, setHasMore] = useState<boolean>(true);
     const loadMaxCount = useCallback(async () => {
         setIsLoading(true);
@@ -28,11 +28,12 @@ const usePosts = () => {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/count`);
             const data = await response.json() as {count:number};
             setMaxCount(data.count);
+            setHasMore(data.count > posts.length);
         } catch (error) {
             console.error("Error loading max count");            
         }
         setIsLoading(false);
-    }, []);
+    }, [posts.length]);
     const loadLocations = useCallback(async () => {
         if(posts.length === maxCount) return;
         setIsLoading(true);
@@ -73,8 +74,10 @@ const usePosts = () => {
     }, [loadLocations]);
 
     const reload = useCallback(() => {
+        console.log("Reloading")
         setPosts([]);
         setMaxCount(0);
+        setHasMore(true);
         (async () => {
             await loadMaxCount();
             await loadLocations();
